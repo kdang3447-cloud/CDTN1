@@ -37,20 +37,33 @@ async function api(data) {
 
 async function load() {
     try {
+        console.log('Loading books...');
         const table = document.getElementById("table");
         table.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center"><i class="fas fa-spinner fa-spin mr-2"></i>Loading books...</td></tr>';
 
-        books = await api({ action: "get" });
+        const response = await api({ action: "get" });
+        console.log('API Response:', response);
+        
+        books = response;
+        console.log('Books loaded:', books.length, 'books');
+        
         render();
     } catch (error) {
         console.error('Load error:', error);
-        document.getElementById("table").innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-600"><i class="fas fa-exclamation-circle mr-2"></i>Error loading books</td></tr>';
+        document.getElementById("table").innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-600"><i class="fas fa-exclamation-circle mr-2"></i>Error loading books: ' + error.message + '</td></tr>';
     }
 }
 
 function render() {
+    console.log('Rendering books, total:', books.length);
     const tb = document.getElementById("table");
     
+    if (!books || books.length === 0) {
+        console.log('No books to render');
+        tb.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Không có sách nào. <a href="#" onclick="document.getElementById(\'title\').focus(); return false;">Thêm sách mới</a></td></tr>';
+        return;
+    }
+
     let total = books.length;
     let value = 0,
         instock = 0,
@@ -58,7 +71,8 @@ function render() {
 
     let html = '';
     
-    books.forEach((b) => {
+    books.forEach((b, index) => {
+        console.log('Book', index + 1, ':', b.title);
         value += parseFloat(b.price) * parseInt(b.stock);
         if (b.stock > 0) instock++;
         else out++;
@@ -80,21 +94,22 @@ function render() {
     <td class="px-6 py-4 whitespace-nowrap">
         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
             <i class="fas ${statusIcon} mr-1"></i>
-            ${b.stock > 0 ? "In Stock" : "Out of Stock"}
+            ${b.stock > 0 ? "Còn hàng" : "Hết hàng"}
         </span>
     </td>
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
         <button onclick='edit(${JSON.stringify(b)})' class="text-indigo-600 hover:text-indigo-900 mr-3 transition-colors">
-            <i class="fas fa-edit mr-1"></i>Edit
+            <i class="fas fa-edit mr-1"></i>Sửa
         </button>
         <button onclick='del(${b.id})' class="text-red-600 hover:text-red-900 transition-colors">
-            <i class="fas fa-trash mr-1"></i>Delete
+            <i class="fas fa-trash mr-1"></i>Xóa
         </button>
     </td>
 </tr>`;
     });
     
     tb.innerHTML = html;
+    console.log('Rendered', total, 'books');
 
     document.getElementById("total").innerText = total;
     document.getElementById("value").innerText = value.toLocaleString() + " đ";
@@ -191,4 +206,13 @@ function resetForm() {
     document.querySelectorAll("input").forEach((i) => (i.value = ""));
 }
 
-load();
+// Ensure page is fully loaded before initializing
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log('DOM loaded, initializing...');
+        load();
+    });
+} else {
+    console.log('Document already loaded, initializing...');
+    load();
+}
