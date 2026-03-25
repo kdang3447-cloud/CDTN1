@@ -50,22 +50,23 @@ async function load() {
 
 function render() {
     const tb = document.getElementById("table");
-    tb.innerHTML = "";
-
+    
     let total = books.length;
     let value = 0,
         instock = 0,
         out = 0;
 
+    let html = '';
+    
     books.forEach((b) => {
-        value += b.price * b.stock;
+        value += parseFloat(b.price) * parseInt(b.stock);
         if (b.stock > 0) instock++;
         else out++;
 
         const statusClass = b.stock > 0 ? 'text-emerald-600 bg-emerald-100' : 'text-red-600 bg-red-100';
         const statusIcon = b.stock > 0 ? 'fa-check-circle' : 'fa-times-circle';
 
-        tb.innerHTML += `
+        html += `
 <tr class="hover:bg-gray-50 transition-colors">
     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${b.title}</td>
     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${b.author}</td>
@@ -92,6 +93,8 @@ function render() {
     </td>
 </tr>`;
     });
+    
+    tb.innerHTML = html;
 
     document.getElementById("total").innerText = total;
     document.getElementById("value").innerText = value.toLocaleString() + " đ";
