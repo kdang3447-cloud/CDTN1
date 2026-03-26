@@ -24,6 +24,12 @@
                 </div>
                 <h1 class="text-3xl font-bold text-white mb-2">Welcome Back</h1>
                 <p class="text-slate-400">Đăng nhập hoặc tạo tài khoản mới</p>
+                @if(session('success'))
+                    <div class="mb-4 p-3 bg-green-600 text-white rounded-lg">{{ session('success') }}</div>
+                @endif
+                @if(session('error'))
+                    <div class="mb-4 p-3 bg-red-600 text-white rounded-lg">{{ session('error') }}</div>
+                @endif
             </div><!-- Card Container -->
             <div class="card-glass rounded-2xl p-8 shadow-2xl">
                 <!-- Tabs -->
