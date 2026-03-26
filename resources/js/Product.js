@@ -5,8 +5,11 @@ async function api(data) {
         const response = await fetch("/api/products", {
             method: "POST",
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRF-TOKEN":
+                    document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute("content") || "",
             },
             body: new URLSearchParams(data),
         });
@@ -17,7 +20,9 @@ async function api(data) {
             try {
                 const errorData = await response.json();
                 if (errorData.errors) {
-                    errorMessage = Object.values(errorData.errors).flat().join(', ');
+                    errorMessage = Object.values(errorData.errors)
+                        .flat()
+                        .join(", ");
                 } else if (errorData.error) {
                     errorMessage = errorData.error;
                 }
@@ -29,38 +34,43 @@ async function api(data) {
 
         return await response.json();
     } catch (error) {
-        console.error('API error:', error);
-        alert('Có lỗi xảy ra: ' + error.message);
+        console.error("API error:", error);
+        alert("Có lỗi xảy ra: " + error.message);
         throw error;
     }
 }
 
 async function load() {
     try {
-        console.log('Loading books...');
+        console.log("Loading books...");
         const table = document.getElementById("table");
-        table.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center"><i class="fas fa-spinner fa-spin mr-2"></i>Loading books...</td></tr>';
+        table.innerHTML =
+            '<tr><td colspan="7" class="px-6 py-4 text-center"><i class="fas fa-spinner fa-spin mr-2"></i>Loading books...</td></tr>';
 
         const response = await api({ action: "get" });
-        console.log('API Response:', response);
-        
+        console.log("API Response:", response);
+
         books = response;
-        console.log('Books loaded:', books.length, 'books');
-        
+        console.log("Books loaded:", books.length, "books");
+
         render();
     } catch (error) {
-        console.error('Load error:', error);
-        document.getElementById("table").innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-600"><i class="fas fa-exclamation-circle mr-2"></i>Error loading books: ' + error.message + '</td></tr>';
+        console.error("Load error:", error);
+        document.getElementById("table").innerHTML =
+            '<tr><td colspan="7" class="px-6 py-4 text-center text-red-600"><i class="fas fa-exclamation-circle mr-2"></i>Error loading books: ' +
+            error.message +
+            "</td></tr>";
     }
 }
 
 function render() {
-    console.log('Rendering books, total:', books.length);
+    console.log("Rendering books, total:", books.length);
     const tb = document.getElementById("table");
-    
+
     if (!books || books.length === 0) {
-        console.log('No books to render');
-        tb.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Không có sách nào. <a href="#" onclick="document.getElementById(\'title\').focus(); return false;">Thêm sách mới</a></td></tr>';
+        console.log("No books to render");
+        tb.innerHTML =
+            '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Không có sách nào. <a href="#" onclick="document.getElementById(\'title\').focus(); return false;">Thêm sách mới</a></td></tr>';
         return;
     }
 
@@ -69,16 +79,19 @@ function render() {
         instock = 0,
         out = 0;
 
-    let html = '';
-    
+    let html = "";
+
     books.forEach((b, index) => {
-        console.log('Book', index + 1, ':', b.title);
+        console.log("Book", index + 1, ":", b.title);
         value += parseFloat(b.price) * parseInt(b.stock);
         if (b.stock > 0) instock++;
         else out++;
 
-        const statusClass = b.stock > 0 ? 'text-emerald-600 bg-emerald-100' : 'text-red-600 bg-red-100';
-        const statusIcon = b.stock > 0 ? 'fa-check-circle' : 'fa-times-circle';
+        const statusClass =
+            b.stock > 0
+                ? "text-emerald-600 bg-emerald-100"
+                : "text-red-600 bg-red-100";
+        const statusIcon = b.stock > 0 ? "fa-check-circle" : "fa-times-circle";
 
         html += `
 <tr class="hover:bg-gray-50 transition-colors">
@@ -107,9 +120,9 @@ function render() {
     </td>
 </tr>`;
     });
-    
+
     tb.innerHTML = html;
-    console.log('Rendered', total, 'books');
+    console.log("Rendered", total, "books");
 
     document.getElementById("total").innerText = total;
     document.getElementById("value").innerText = value.toLocaleString() + " đ";
@@ -126,24 +139,25 @@ async function save() {
     const stock = document.getElementById("stock").value;
 
     if (!title || !author || !category || !price || !stock) {
-        alert('Vui lòng điền đầy đủ thông tin!');
+        alert("Vui lòng điền đầy đủ thông tin!");
         return;
     }
 
     if (isNaN(price) || price <= 0) {
-        alert('Giá phải là số dương!');
+        alert("Giá phải là số dương!");
         return;
     }
 
     if (isNaN(stock) || stock < 0) {
-        alert('Số lượng phải là số không âm!');
+        alert("Số lượng phải là số không âm!");
         return;
     }
 
     try {
         const saveBtn = document.getElementById("saveBtn");
         const originalText = saveBtn.innerHTML;
-        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+        saveBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
         saveBtn.disabled = true;
 
         const id = document.getElementById("id").value;
@@ -158,16 +172,17 @@ async function save() {
             stock,
         });
 
-        showMessage('Book saved successfully!', 'success');
+        showMessage("Book saved successfully!", "success");
         resetForm();
         load();
 
         saveBtn.innerHTML = originalText;
         saveBtn.disabled = false;
     } catch (error) {
-        console.error('Save error:', error);
-        showMessage('Error saving book: ' + error.message, 'error');
-        document.getElementById("saveBtn").innerHTML = '<i class="fas fa-save mr-2"></i>Save Book';
+        console.error("Save error:", error);
+        showMessage("Error saving book: " + error.message, "error");
+        document.getElementById("saveBtn").innerHTML =
+            '<i class="fas fa-save mr-2"></i>Save Book';
         document.getElementById("saveBtn").disabled = false;
     }
 }
@@ -185,21 +200,21 @@ async function del(id) {
     if (confirm("Are you sure you want to delete this book?")) {
         try {
             await api({ action: "delete", id });
-            showMessage('Book deleted successfully!', 'success');
+            showMessage("Book deleted successfully!", "success");
             load();
         } catch (error) {
-            console.error('Delete error:', error);
-            showMessage('Error deleting book: ' + error.message, 'error');
+            console.error("Delete error:", error);
+            showMessage("Error deleting book: " + error.message, "error");
         }
     }
 }
 
 function showMessage(message, type) {
     const msgDiv = document.getElementById("message");
-    msgDiv.className = `mb-4 p-4 rounded-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`;
-    msgDiv.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>${message}`;
-    msgDiv.classList.remove('hidden');
-    setTimeout(() => msgDiv.classList.add('hidden'), 5000);
+    msgDiv.className = `mb-4 p-4 rounded-lg ${type === "success" ? "bg-green-100 text-green-800 border border-green-200" : "bg-red-100 text-red-800 border border-red-200"}`;
+    msgDiv.innerHTML = `<i class="fas ${type === "success" ? "fa-check-circle" : "fa-exclamation-circle"} mr-2"></i>${message}`;
+    msgDiv.classList.remove("hidden");
+    setTimeout(() => msgDiv.classList.add("hidden"), 5000);
 }
 
 function resetForm() {
@@ -208,11 +223,11 @@ function resetForm() {
 
 // Ensure page is fully loaded before initializing
 if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function() {
-        console.log('DOM loaded, initializing...');
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM loaded, initializing...");
         load();
     });
 } else {
-    console.log('Document already loaded, initializing...');
+    console.log("Document already loaded, initializing...");
     load();
 }
