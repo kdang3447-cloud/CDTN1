@@ -1,17 +1,25 @@
 <?php
-require_once __DIR__ . '/../models/Book.php';
+
+namespace App\Http\controllers;
+
+use App\models\Book;
 
 class HomeController
 {
     public function index()
     {
         $bookModel = new Book();
-
         $books = $bookModel->getAll();
-        $totalBooks = $bookModel->countBooks();
-        $categories = $bookModel->getCategories();
-        $totalCategories = $bookModel->countCategories();
 
-        require __DIR__ . '/../views/home.php';
+        $booksByCategory = [];
+
+        foreach ($books as $book) {
+            $category = !empty($book['category']) ? $book['category'] : 'Khác';
+            $booksByCategory[$category][] = $book;
+        }
+
+        $pageTitle = 'Trang chủ cửa hàng sách';
+
+        require BASE_PATH . '/app/views/home/index.php';
     }
 }
