@@ -1,11 +1,38 @@
 [
     {
-        "action": "update",
-        "id": "1774270699",
-        "title": "conan",
-        "author": "12",
-        "category": "trẻ em ",
-        "price": "10000",
-        "stock": "1"
+        "id": 1,
+        "title": "Những vụ kỳ án của Sherlock Holmes",
+        "author": "Arthur Conan Doyle",
+        "category": "Sách văn học kinh điển",
+        "price": 112100,
+        "stock": 12,
+        "image": "public/images/sherlock.jpg"
+    },
+    {
+        "id": 2,
+        "title": "Công bằng trên đời là do bạn tự giành lấy",
+        "author": "NHBook",
+        "category": "Sách hướng nghiệp & phát triển bản thân",
+        "price": 99000,
+        "stock": 8,
+        "image": "public/images/ca-voi.jpg"
+    },
+    {
+        "id": 3,
+        "title": "Mỗi lần vấp ngã là một lần trưởng thành",
+        "author": "Minh Long Books",
+        "category": "Sách hướng nghiệp & phát triển bản thân",
+        "price": 120000,
+        "stock": 15,
+        "image": "public/images/moi-lan-vap-nga.jpg"
+    },
+    {
+        "id": 4,
+        "title": "Tuổi trẻ đáng giá bao nhiêu",
+        "author": "Rosie Nguyễn",
+        "category": "Sách hướng nghiệp & phát triển bản thân",
+        "price": 96000,
+        "stock": 20,
+        "image": "public/images/tuoi-tre-dang-gia.jpg"
     }
 ]
