@@ -1,0 +1,42 @@
+<?php 
+define('BASE_PATH', __DIR__ . '/../app');
+require BASE_PATH . '/app/views/partials/header.php'; ?>
+
+<section class="hero">
+    <div class="hero-content">
+        <h2>Chào mừng đến với cửa hàng sách</h2>
+        <p>Khám phá những đầu sách hay về văn học, kỹ năng và phát triển bản thân.</p>
+    </div>
+</section>
+
+<?php if (!empty($booksByCategory)): ?>
+    <?php foreach ($booksByCategory as $category => $categoryBooks): ?>
+        <section class="book-section">
+            <h2 class="section-title"><?= htmlspecialchars($category) ?></h2>
+
+            <div class="book-grid">
+                <?php foreach ($categoryBooks as $book): ?>
+                    <div class="book-card">
+                        <div class="book-image">
+                            <img src="<?= htmlspecialchars($book['image']) ?>"
+                                 alt="<?= htmlspecialchars($book['title']) ?>"
+                                 onerror="this.src='public/images/default-book.jpg'">
+                        </div>
+
+                        <div class="book-info">
+                            <h3 class="book-title"><?= htmlspecialchars($book['title']) ?></h3>
+                            <p class="book-author"><?= htmlspecialchars($book['author']) ?></p>
+                            <p class="book-price"><?= number_format($book['price'], 0, ',', '.') ?> đ</p>
+                            <p class="book-stock">Còn lại: <?= (int)$book['stock'] ?></p>
+                            <button class="btn-buy">Xem chi tiết</button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    <?php endforeach; ?>
+<?php else: ?>
+    <p>Chưa có dữ liệu sách để hiển thị.</p>
+<?php endif; ?>
+
+<?php require BASE_PATH . '/app/views/partials/footer.php'; ?>
