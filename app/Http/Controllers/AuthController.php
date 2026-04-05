@@ -72,3 +72,4 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 }
+// Update dự án Bookstore
