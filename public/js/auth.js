@@ -21,7 +21,7 @@ function switchMode() {
     }
 }
 
-function togglePassword(inputId) {
+function togglePassword(inputId, event) {
     const input = document.getElementById(inputId);
     const icon = event.currentTarget;
 

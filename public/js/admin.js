@@ -48,11 +48,48 @@ const dataHandler = {
 };
 
 async function initializeApp() {
-    const result = await window.dataSdk.init(dataHandler);
-    if (!result.isOk) {
-        console.error("Failed to initialize data SDK");
-    }
+    console.log("Khởi tạo ứng dụng...");
+    await loadBooks();
+    console.log("loadBooks() hoàn thành, gọi lucide.createIcons()");
     lucide.createIcons();
+    console.log("Ứng dụng đã sẵn sàng");
+}
+
+// Fetch books from API
+async function loadBooks() {
+    try {
+        console.log("Đang tải danh sách sách...");
+        const response = await fetch("/api/books", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ action: "get" }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const books = await response.json();
+        console.log("Dữ liệu nhận được từ API:", books);
+
+        allBooks = books.map((book, index) => ({
+            ...book,
+            __backendId: book.id,
+        }));
+
+        console.log("allBooks đã cập nhật:", allBooks);
+
+        renderBooksTable();
+        renderRecentBooks();
+        updateStats();
+
+        console.log("Các hàm render đã được gọi");
+    } catch (error) {
+        console.error("Failed to load books:", error);
+        showToast("Lỗi tải dữ liệu sách: " + error.message, "error");
+    }
 }
 
 function updateTopbarTitle() {
@@ -104,7 +141,7 @@ function openModal(id = null) {
     if (id) {
         const book = allBooks.find((b) => b.__backendId === id);
         if (book) {
-            title.textContent = "Chỉnh sửa sách";
+            title.textContent = " Sửa ";
             document.getElementById("bookTitle").value = book.title;
             document.getElementById("bookAuthor").value = book.author;
             document.getElementById("bookCategory").value = book.category;
@@ -140,27 +177,28 @@ async function handleFormSubmit(e) {
         category: document.getElementById("bookCategory").value,
         price: parseFloat(document.getElementById("bookPrice").value),
         stock: parseInt(document.getElementById("bookStock").value),
-        status:
-            parseInt(document.getElementById("bookStock").value) > 0
-                ? "active"
-                : "inactive",
     };
 
     try {
-        let result;
+        let url = "/api/books";
+        let body = { action: "create", ...bookData };
+
         if (editingId) {
-            const book = allBooks.find((b) => b.__backendId === editingId);
-            result = await window.dataSdk.update({
-                ...book,
-                ...bookData,
-            });
-        } else {
-            bookData.id = Date.now().toString();
-            bookData.createdAt = new Date().toISOString();
-            result = await window.dataSdk.create(bookData);
+            body.action = "update";
+            body.id = editingId;
         }
 
-        if (result.isOk) {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.ok) {
             showToast(
                 editingId
                     ? "Cập nhật sách thành công!"
@@ -168,9 +206,13 @@ async function handleFormSubmit(e) {
                 "success",
             );
             closeModal();
+            await loadBooks();
         } else {
-            showToast("Có lỗi xảy ra!", "error");
+            showToast(result.error || "Có lỗi xảy ra!", "error");
         }
+    } catch (error) {
+        console.error("Error:", error);
+        showToast("Có lỗi xảy ra: " + error.message, "error");
     } finally {
         submitBtn.innerHTML = editingId
             ? "<span>Cập nhật</span>"
@@ -186,10 +228,28 @@ async function deleteBook(id) {
     const confirmed = confirm("Bạn chắc chắn muốn xoá sách này?");
     if (!confirmed) return;
 
-    const result = await window.dataSdk.delete(book);
-    if (result.isOk) {
-        showToast("Xoá sách thành công!", "success");
-    } else {
+    try {
+        const response = await fetch("/api/books", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                action: "delete",
+                id: id,
+            }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.ok) {
+            showToast("Xoá sách thành công!", "success");
+            await loadBooks();
+        } else {
+            showToast(result.error || "Có lỗi xảy ra!", "error");
+        }
+    } catch (error) {
+        console.error("Error:", error);
         showToast("Có lỗi xảy ra!", "error");
     }
 }
@@ -227,12 +287,12 @@ function renderBooksTable() {
         </span>
       </td>
       <td>
-        <div class="action-buttons">
-          <button class="btn-icon" onclick="openModal('${book.__backendId}')">
-            <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
+        <div class="action-buttons" style="display: flex; gap: 8px;">
+          <button class="btn-icon" onclick="openModal('${book.__backendId}')" title="Sửa sách" style="padding: 6px 12px; background: #0ea5e9; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px; hover: background-color: #0284c7;">
+            <i data-lucide="edit" style="width: 16px; height: 16px;"></i> Sửa
           </button>
-          <button class="btn-icon btn-danger" onclick="deleteBook('${book.__backendId}')">
-            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+          <button class="btn-icon btn-danger" onclick="deleteBook('${book.__backendId}')" title="Xóa sách" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> Xóa
           </button>
         </div>
       </td>
@@ -276,12 +336,12 @@ function renderRecentBooks() {
         </span>
       </td>
       <td>
-        <div class="action-buttons">
-          <button class="btn-icon" onclick="openModal('${book.__backendId}')">
-            <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
+        <div class="action-buttons" style="display: flex; gap: 8px;">
+          <button class="btn-icon" onclick="openModal('${book.__backendId}')" title="Sửa sách" style="padding: 6px 12px; background: #0ea5e9; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="edit" style="width: 16px; height: 16px;"></i> Sửa
           </button>
-          <button class="btn-icon btn-danger" onclick="deleteBook('${book.__backendId}')">
-            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+          <button class="btn-icon btn-danger" onclick="deleteBook('${book.__backendId}')" title="Xóa sách" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> Xóa
           </button>
         </div>
       </td>
@@ -341,4 +401,8 @@ document.getElementById("bookModal").addEventListener("click", (e) => {
 });
 
 // Initialize
-initializeApp();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}

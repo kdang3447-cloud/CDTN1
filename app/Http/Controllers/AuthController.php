@@ -28,8 +28,17 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if ($user && Hash::check($request->password, $user->password)) {
-            session(['user' => $user->name, 'user_id' => $user->id]);
-            return redirect('/');
+            // Đảm bảo role được set mặc định nếu chưa có
+            if (!$user->role) {
+                $user->role = 'user';
+                $user->save();
+            }
+            session(['user' => $user->name, 'user_id' => $user->id, 'role' => $user->role]);
+            if ($user->role === 'admin') {
+                return redirect('/admin');
+            } else {
+                return redirect('/');
+            }
         }
 
         return back()->with('error', 'Sai email hoặc mật khẩu');
@@ -51,13 +60,16 @@ class AuthController extends Controller
             'password.confirmed' => 'Mật khẩu xác nhận không khớp.',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password)
+            'password' => Hash::make($request->password),
+            'role' => 'user'
         ]);
 
-        return redirect('/auth')->with('success', 'Đăng ký thành công! Vui lòng đăng nhập.');
+        // Tự động đăng nhập sau khi đăng ký và chuyển đến trang chủ
+        session(['user' => $user->name, 'user_id' => $user->id, 'role' => $user->role]);
+        return redirect('/')->with('success', 'Đăng ký thành công! Đã chuyển đến trang chủ.');
     }
 
     public function logout(Request $request)

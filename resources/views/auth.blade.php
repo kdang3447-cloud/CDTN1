@@ -25,17 +25,17 @@
                 <h1 class="text-3xl font-bold text-white mb-2">Welcome Back</h1>
                 <p class="text-slate-400">Đăng nhập hoặc tạo tài khoản mới</p>
                 @if(session('success'))
-                    <div class="mb-4 p-3 bg-green-600 text-white rounded-lg">{{ session('success') }}</div>
+                <div class="mb-4 p-3 bg-green-600 text-white rounded-lg">{{ session('success') }}</div>
                 @endif
                 @if(session('error'))
-                    <div class="mb-4 p-3 bg-red-600 text-white rounded-lg">{{ session('error') }}</div>
+                <div class="mb-4 p-3 bg-red-600 text-white rounded-lg">{{ session('error') }}</div>
                 @endif
             </div><!-- Card Container -->
             <div class="card-glass rounded-2xl p-8 shadow-2xl">
                 <!-- Tabs -->
                 <div class="flex gap-8 mb-8 border-b border-slate-700"><button id="loginTab"
-                        class="pb-3 font-semibold text-sm transition-all tab-active"> Đăng Nhập </button> <button
-                        id="registerTab" class="pb-3 font-semibold text-sm transition-all tab-inactive"> Đăng Ký
+                        class="pb-3 font-semibold text-sm transition-all tab-active"> Đăng Nhập </button>
+                    <button id="registerTab" class="pb-3 font-semibold text-sm transition-all tab-inactive"> Đăng Ký
                     </button>
                 </div><!-- Login Form -->
                 <form id="loginForm" class="login-form animate-slide-in" method="POST" action="/login">
@@ -102,7 +102,7 @@
                     </div><!-- Password Input -->
                     <div class="mb-5"><label class="block text-sm font-medium text-slate-300 mb-2">Mật Khẩu</label>
                         <div class="relative"><i data-lucide="lock" class="absolute left-3 top-3 text-slate-500"
-                                style="width: 20px; height: 20px;"></i> <input type="password" id="registerPassword"
+                                style="width: 20px; height: 20px;"></i> <input type="password" id="registerPassword" name="password"
                                 placeholder="••••••••"
                                 class="input-dark w-full pl-10 pr-12 py-3 rounded-lg text-white placeholder-slate-500 outline-none"
                                 required> <i data-lucide="eye"
@@ -113,7 +113,7 @@
                     <div class="mb-6"><label class="block text-sm font-medium text-slate-300 mb-2">Xác Nhận Mật
                             Khẩu</label>
                         <div class="relative"><i data-lucide="lock" class="absolute left-3 top-3 text-slate-500"
-                                style="width: 20px; height: 20px;"></i> <input type="password" id="confirmPassword"
+                                style="width: 20px; height: 20px;"></i> <input type="password" id="confirmPassword" name="password_confirmation"
                                 placeholder="••••••••"
                                 class="input-dark w-full pl-10 pr-12 py-3 rounded-lg text-white placeholder-slate-500 outline-none"
                                 required> <i data-lucide="eye"

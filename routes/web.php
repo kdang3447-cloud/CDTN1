@@ -20,9 +20,18 @@ Route::get('/admin', function () {
     if (!session('user')) {
         return redirect('/auth');
     }
+    $user = \App\Models\User::find(session('user_id'));
+    if (!$user || $user->role !== 'admin') {
+        return redirect('/')->with('error', 'Bạn không có quyền truy cập trang quản lý.');
+    }
     return view('admin');
 });
 
 Route::get('/products', function () {
     return view('viewProduct');
+});
+
+Route::post('/api/books', [ProductController::class, 'api']);
+Route::get('/api/books-debug', function () {
+    return response()->json(\App\Models\Book::all());
 });
